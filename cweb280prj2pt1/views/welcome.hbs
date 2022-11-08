@@ -1,0 +1,15 @@
+<form action="/login/welcome" method="post">
+<h1>{{Title}}</h1>    
+    <div class="mb-2">
+        <label class="form-label" for="public">ES256 Public key:</label>
+        <textarea class="form-control " id="public" name="public" rows = '3' required>{{publickey}}</textarea>
+        <div class="invalid-feedback"> {{err.publickey}} </div>
+    </div>
+    <div class="mb-2">
+        <label class="form-label" for="private">ES256 Private key:</label>
+        <textarea class="form-control " id="private" name="private" rows = '3' required>{{privatekey}}</textarea>
+        <div class="invalid-feedback"> {{err.privatekey}} </div>
+    </div>
+    
+     <button type="submit" class="btn btn-primary">Submit</button>
+</form>

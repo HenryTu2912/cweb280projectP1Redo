@@ -11,7 +11,8 @@ var devRouter = require('./routes/devLogin');
 const examplesRouter = require('./routes/examples')
 
 var app = express();
-//-------Passport-------------------
+app.use(cookieParser())
+//------------Passport local-------------------
 const passport = require('passport')
 const session = require('express-session')
 
@@ -34,8 +35,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-
-
+//-------------------------------------------------
 
 
 

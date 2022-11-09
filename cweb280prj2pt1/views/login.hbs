@@ -2,13 +2,13 @@
 <h1>LOG IN</h1>    
     <div class="mb-2">
         <label class="form-label" for="username">User name:</label>
-        <input type="text" class="form-control "
+        <input type="text" class="form-control " value="{{cookieUsername}}"
                placeholder="Enter username" id="username" name="username" required>
         <div class="invalid-feedback"> {{err.username}} </div>
     </div>
     <div class="mb-2">
         <label class="form-label" for="password">Password:</label>
-        <input type="password" class="form-control "
+        <input type="password" class="form-control " value="{{cookiePassword}}"
                placeholder="Enter password" id="password" name="password" required>
         <div class="invalid-feedback"> {{err.password}} </div>
     </div>

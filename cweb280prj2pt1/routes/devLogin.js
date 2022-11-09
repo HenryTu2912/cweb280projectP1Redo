@@ -4,17 +4,36 @@ const passport = require('passport')
 var fs = require('fs');
 
 router.get('/', checkNotAuthenticated, (req, res, next)=>{
-    res.render('login')
+    var user = req.cookies.username
+    console.log(user)
+    res.render('login', {
+        cookieUsername: user.username,
+        cookiePassword: user.password
+    })
 })
 
 router.post('/', checkNotAuthenticated, passport.authenticate('local',  {
     //successRedirect: '/login/welcome',
     failureRedirect: '/login',
 }), (req, res, next)=>{
+    const cookieOptions ={
+        path: req.baseUrl,
+        sameSite: 'lax',
+        httpOnly: true,
+        maxAge: 30*24*60*60*1000,
+    }
+    var user = {
+        username: req.body.username,
+        password: req.body.password
+    }
+    console.log(user);
+    res.cookie('username', user, cookieOptions)
     res.redirect('/login/welcome')
 })
 
 router.get('/welcome', checkAuthenticated, (req, res, next)=>{
+    console.log(req.cookies)
+    console.log(req.cookies.val)
     res.render('welcome', {
         Title: 'KEY PAGE',
         publickey: fs.readFileSync('es256public.pem'),
@@ -31,6 +50,8 @@ router.post('/welcome', checkAuthenticated, (req, res)=>{
     fs.writeFileSync('es256private.key', newPrivate)
     res.render('welcome', {
         Title: 'SUCCESSFULLY UPDATE KEY',
+        publickey: 'Updated new public key',
+        privatekey: 'Updated new private key'
     })
 })
 

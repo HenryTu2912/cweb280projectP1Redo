@@ -1,0 +1,34 @@
+<form action="/login/messages" method="post">
+<h1>{{title}}</h1>
+    <h2 class="text-danger">{{err.auth}}</h2>
+    <div class="mb-2">
+        <label class="form-label" for="message">Secret message:</label>
+        <input type="text" class="form-control "
+               placeholder="Enter secret message" id="message" name="message" value="{{submittedMessage}}" required>
+        <div class="invalid-feedback"> {{err.Message}} </div>
+    </div>
+    <div class="mb-2">
+        <label class="form-label" for="email">Email address:</label>
+        <input type="email" class="form-control "
+               placeholder="Enter email" id="email" name="email" value="{{submittedEmail}}" required>
+        <div class="invalid-feedback"> {{err.email}} </div>
+    </div>
+    <div class="mb-2">
+        <label class="form-label" for="exDate">Expired date:</label>
+        <input type="date" class="form-control "
+               placeholder="Enter expried date" id="exDate" name="exDate" value="{{submittedExDate}}" required>
+        <div class="invalid-feedback"> {{err.exDate}} </div>
+    </div>
+     <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<div class="card p-2">
+    <h2>Session: {{sessionID}}</h2>
+    <code><pre>{{activeSession}}</pre></code>
+</div>
+<div class="card p-2 mb-2">
+    <h2>Click here to view the message {{cutJWT}}</h2>
+    {{#each listSession}}
+        <li class="col-md-8 fs-4"><a href="/login/receiveMsg">{{cutJWT}} </a></li>
+    {{/each}}
+</div>

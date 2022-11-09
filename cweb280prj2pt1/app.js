@@ -3,18 +3,62 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const session = require('express-session')
+const Sqlite = require('better-sqlite3'); // sqlite database driver
+const SqliteStore = require('better-sqlite3-session-store')(session);
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var devRouter = require('./routes/devLogin');
 //add a new const for the examples.js router
 const examplesRouter = require('./routes/examples')
-
+// const Handlebars = require("handlebars");
+// Handlebars.registerHelper('cutJWT', function(ses){
+//   var sb = ses.slice(0, 20);
+//   console.log(sb)
+//   return sb;
+// })
 var app = express();
+const expbs = require('express-handlebars')
+
+var hbs = expbs.create({  
+  // defaultLayout: 'main',
+  // layoutsDir: path.join(__dirname, 'views'),
+  // partialsDir: path.join(__dirname, 'views'),
+  helpers: {
+    cutJWT: function () { return "Lorem ipsum" },
+  },
+});
+
+app.engine('handlebars', hbs.engine);
+app.set('view engine', 'handlebars')
+// app.engine('handlebars', expbs({
+//   helpers: {
+//     cutJWT: function () { return "Lorem ipsum" },
+//   },
+//   defaultLayout: 'main',
+//   layoutsDir: path.join(__dirname, 'views'),
+//   partialsDir: path.join(__dirname, 'views'),
+//   extname: '.hbs'
+// }).engine)
+// app.set('view engine', '.hbs');
+
+// const hbs = create({
+//   // Specify helpers which are only registered on this instance.
+//   helpers: {
+//       foo() { return 'FOO!'; },
+//       bar() { return 'BAR!'; }
+//   }
+// });
+
+// app.engine('handlebars', hbs.engine);
+// app.set('view engine', 'handlebars');
+// app.set('views', './views');
+
+
+
 app.use(cookieParser())
 //------------Passport local-------------------
 const passport = require('passport')
-const session = require('express-session')
 
 const initializePassport = require('./passport-config')
 initializePassport(
@@ -22,12 +66,16 @@ initializePassport(
     username => users.find(user => user.username === username)
 )
 
-const users = [{id: '1', username: 'henry', password: '12345'}]
+const users = [{username: 'henry', password: '12345'}]
 
 app.use(session({
   secret: 'shhhhhhh_this-is+SECret', 
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: new SqliteStore({ // a location to store session besides the memory
+    client: new Sqlite('sessions.db', {verbose: console.log}),
+    expired: {clear: true, intervalMs: 1000*60*15},
+  }),  
 }))
 
 

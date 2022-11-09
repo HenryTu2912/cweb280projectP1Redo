@@ -1,3 +1,4 @@
+const { json } = require('express');
 const { authenticate } = require('passport')
 // const bcrypt = require('bcrypt')
 const LocalStrategy = require('passport-local').Strategy
@@ -20,10 +21,12 @@ function initialize(passport, getUserByName) {
         }
     }
     passport.use(new GoogleStrategy({
-        clientID: '478420348143-ipf9plfjcg27qm4h30a7cg6nuu2brrgn.apps.googleusercontent.com',
-        clientSecret: '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',
-        callbackURL: 'http://localhost:3000/messages'
+        clientID: '478420348143-m90s5qe3fn0sj3dijs7migom5g38v7b9.apps.googleusercontent.com',
+        clientSecret: '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',
+        callbackURL: 'http://localhost:3000/login/messages'
     }, function (request, accessToken, refreshToken, profile, done){
+        
+        console.log(JSON.stringify(profile))
         return done(null, profile)
     }))
     passport.use(new LocalStrategy({usernameField: 'username'}, authenticateUser))

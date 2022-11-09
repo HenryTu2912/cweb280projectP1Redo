@@ -2,15 +2,15 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 var fs = require('fs');
-const Handlebars = require("handlebars");
 //--------JWT--------------
 const jwt = require('jsonwebtoken')
 let jwtArray = []
 
+
 const determineAccess = (req)=> {
     const payload = {message: null, sender: null, receiver: null, expiredDate: null};
     payload.message = req.body.message;
-    payload.sender = "sender";
+    payload.sender = req.session.passport.user;
     payload.receiver = req.body.email;
     var date1 = new Date();
     var date2 = new Date(req.body.exDate);
@@ -40,14 +40,10 @@ const determineAccess = (req)=> {
       decoded = jwt.verify(token, cert, {algorithm: 'ES256',
       } );
   
-      // check that the scope in the token matches the scope passed in as a param
-    //   if (!decoded.role || decoded.role != 'admin') { // this allows admin user to go to any page
-    //     if (!decoded.scope || decoded.scope != scope) throw new Error('scope is not permitted');
-    //   }
     } catch (err) {
       console.log(`JWT Error:\n ${err}`);
       // redirect back to login page and specify the error message in the query string
-      decoded = {redirectURL: '/secure/?err=' + err.message};
+      decoded = {redirectURL: '/login'};
     }
     return decoded;
   };
@@ -60,10 +56,13 @@ const determineAccess = (req)=> {
 router.get('/', checkNotAuthenticated, (req, res, next)=>{
     var user = req.cookies.username
     console.log(user)
-    res.render('login', {
-        cookieUsername: user.username,
-        cookiePassword: user.password
-    })
+    if(user){
+        res.render('login', {
+            cookieUsername: user.username,
+            cookiePassword: user.password
+        })
+    }
+    res.render('login')
 })
 
 router.post('/', checkNotAuthenticated, passport.authenticate('local',  {
@@ -87,13 +86,12 @@ router.post('/', checkNotAuthenticated, passport.authenticate('local',  {
 
 //==================WELCOME PAGE==========================
 router.get('/welcome', checkAuthenticated, (req, res, next)=>{
-    console.log(req.cookies)
-    console.log(req.cookies.val)
     res.render('welcome', {
         Title: 'KEY PAGE',
         publickey: fs.readFileSync('es256public.pem'),
         privatekey:fs.readFileSync('es256private.key')
     })
+    
 })
 
 router.post('/welcome', checkAuthenticated, (req, res)=>{
@@ -111,28 +109,24 @@ router.post('/welcome', checkAuthenticated, (req, res)=>{
 })
 
 //==================GOOGLE LOG IN==========================
-router.get('/auth/google', checkNotAuthenticated, passport.authenticate('google', {scope: ['email', 'profile']}, (req,res,next)=>{
-    console.log('=========================')
-    console.log(req.email)
-    console.log(req.authenticate.email)
-}))
+router.get('/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}))
 
-router.get('/auth/google/callback', checkNotAuthenticated, passport.authenticate('google', {
+router.get('/google/callback', passport.authenticate('google', {
     successRedirect: '/login/messages',
     failureRedirect: '/login'
 }))
 
 
-//==================MESSAGES PAGE==========================
-router.get('/messages', checkNotAuthenticated, (req, res, next)=>{
+//=================MESSAGES PAGE==========================
+router.get('/messages', isLoggedIn, (req, res, next)=>{
+    
     res.render('messages',{
-        title: 'Messages'
+        title: 'Messages',
+        email: req.user.email
     })
 })
 
-
-
-router.post('/messages', (req, res, next)=>{
+router.post('/messages', isLoggedIn, (req, res, next)=>{
     const payload = determineAccess(req);
     console.log('===========CHECK AUTHENTICATE==============')
     // set some standard cookie options
@@ -161,10 +155,6 @@ router.post('/messages', (req, res, next)=>{
         console.log(newObj)
         jwtCut.push(newObj);
     });
-    console.log("=========================")
-    console.log(jwtCut)
-    //for(let i = 0; i < jwtCut.length; i++)
-    //res.redirect('/secure/secretMessage/?access_token=' + encodeJWT(payload));
     res.render('messages',{
         title: 'Messages',
         sessionID: req.sessionID,
@@ -174,18 +164,17 @@ router.post('/messages', (req, res, next)=>{
 })
 
 //==================DISPLAY THE MESSAGE==========================
-router.get('/receiveMsg', (req, res, next)=>{
+router.get('/receiveMsg', isLoggedIn, (req, res, next)=>{
     // get the current scope from the request path (remove the slashes from /dashboard/)
       const scope = req.path.replace(/^\/+|\/+$/g, '');
       // check the user has access to the current scope
       const decoded = checkJWT(req.query['access_token'], scope);
-      console.log("===================")
-      console.log()
+   
       if (decoded.redirectURL) {
         // show the error on the login page
         res.redirect(decoded.redirectURL);
       } else {
-        if(decoded.receiver === req.session.email || decoded.sender === 'sender'){
+        if(decoded.receiver === req.session.email || decoded.sender === req.session.passport.user){
             // display the webpage with title and token payload
             res.render('receiveMsg', {
                 title: 'DISPLAY SECRET MESSAGE',
@@ -201,8 +190,23 @@ router.get('/receiveMsg', (req, res, next)=>{
       }
     } );
   
+//==================LOG OUT==========================
+router.get('/logout', async (req, res, next)=>{
+    console.log('=======LOG OUT==============')
+    await req.logOut(true, done=>{
+        res.redirect('/login')}
+        );
+    
+})
+
 
 //==================AUTHENTICATE METHODS==========================
+
+function isLoggedIn(req, res, next) {
+    req.user ? next() : res.redirect('/login')
+}
+
+
 function checkAuthenticated(req, res, next) {
     if(req.isAuthenticated()) {
         return next()
@@ -213,8 +217,9 @@ function checkAuthenticated(req, res, next) {
 }
 
 function checkNotAuthenticated(req, res, next) {
+    
     if(req.isAuthenticated()) {
-        return redirect('/login')
+        return res.redirect('/login')
     }
     next()
 }

@@ -19,55 +19,24 @@ Handlebars.registerHelper('cutJWT', function(ses){
 })
 var app = express();
 
-
-
-// const expbs = require('express-handlebars')
-
-// var hbs = expbs.create({  
-//   // defaultLayout: 'main',
-//   layoutsDir: path.join(__dirname, 'views'),
-//   partialsDir: path.join(__dirname, 'views'),
-//   helpers: {
-//     calculation: function(){
-//       return "Hello";
-//     }
-//   },
-// });
-
-// app.engine('handlebars', hbs.engine);
-// app.set('view engine', 'handlebars')
-
-
-
-
-// app.engine('handlebars', expbs({
-//   helpers: {
-//     cutJWT: function () { return "Lorem ipsum" },
-//   },
-//   defaultLayout: 'main',
-//   layoutsDir: path.join(__dirname, 'views'),
-//   partialsDir: path.join(__dirname, 'views'),
-//   extname: '.hbs'
-// }).engine)
-// app.set('view engine', '.hbs');
-
-// const hbs = create({
-//   // Specify helpers which are only registered on this instance.
-//   helpers: {
-//       foo() { return 'FOO!'; },
-//       bar() { return 'BAR!'; }
-//   }
-// });
-
-// app.engine('handlebars', hbs.engine);
-// app.set('view engine', 'handlebars');
-// app.set('views', './views');
-
-
-
 app.use(cookieParser())
-//------------Passport local-------------------
 const passport = require('passport')
+//------------Google Passport local-------------------
+var GoogleStrategy = require('passport-google-oidc').Strategy;
+
+const GGUser = []
+
+passport.use(new GoogleStrategy({
+  clientID: '478420348143-m90s5qe3fn0sj3dijs7migom5g38v7b9.apps.googleusercontent.com',
+  clientSecret: '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',
+  callbackURL: 'http://localhost:3000/login/google/callback',
+  passReqToCallback: true
+}, function (request, accessToken, refreshToken, profile, done){
+  return done(null, profile)
+}))
+
+
+//------------Passport local-------------------
 
 const initializePassport = require('./passport-config')
 initializePassport(
@@ -90,12 +59,10 @@ app.use(session({
 
 app.use(passport.initialize())
 app.use(passport.session())
-
-//-------------------------------------------------
-
-
-
-
+passport.serializeUser((user, done) => done(null, user))
+passport.deserializeUser((user, done) => {
+    return done(null, user)
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

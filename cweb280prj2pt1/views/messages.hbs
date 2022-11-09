@@ -1,5 +1,6 @@
 <form action="/login/messages" method="post">
 <h1>{{title}}</h1>
+<h1>{{email}}</h1>
     <h2 class="text-danger">{{err.auth}}</h2>
     <div class="mb-2">
         <label class="form-label" for="message">Secret message:</label>
@@ -28,7 +29,13 @@
 </div>
 <div class="card p-2 mb-2">
     <h2>Click here to view the message</h2>
+    <p>{{current}}</p>
     {{#each listSession}}
         <li class="col-md-8 fs-4"><a href="/login/receiveMsg/?access_token={{this.fullJWT}}">{{this.shortJWT}} </a></li>
     {{/each}}
 </div>
+
+<form action="/login/logout" method="get">
+<h1>LOG OUT WITH GOOGLE</h1>        
+    <button class="btn btn-danger" type="submit">LOG OUT</button>
+</form>

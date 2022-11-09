@@ -55,6 +55,13 @@ router.post('/welcome', checkAuthenticated, (req, res)=>{
     })
 })
 
+router.get('/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}))
+
+router.get('/auth/google/callback', passport.authenticate('google', {
+    successRedirect: '/messages',
+    failureRedirect: '/login'
+}))
+
 function checkAuthenticated(req, res, next) {
     if(req.isAuthenticated()) {
         return next()

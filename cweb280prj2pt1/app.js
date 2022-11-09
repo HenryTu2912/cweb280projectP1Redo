@@ -19,8 +19,7 @@ const session = require('express-session')
 const initializePassport = require('./passport-config')
 initializePassport(
     passport,
-    username => users.find(user => user.username === username),
-    id => users.find(user => user.id === id)
+    username => users.find(user => user.username === username)
 )
 
 const users = [{id: '1', username: 'henry', password: '12345'}]

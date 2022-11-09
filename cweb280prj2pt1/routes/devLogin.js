@@ -111,7 +111,11 @@ router.post('/welcome', checkAuthenticated, (req, res)=>{
 })
 
 //==================GOOGLE LOG IN==========================
-router.get('/auth/google', checkNotAuthenticated, passport.authenticate('google', {scope: ['email', 'profile']}))
+router.get('/auth/google', checkNotAuthenticated, passport.authenticate('google', {scope: ['email', 'profile']}, (req,res,next)=>{
+    console.log('=========================')
+    console.log(req.email)
+    console.log(req.authenticate.email)
+}))
 
 router.get('/auth/google/callback', checkNotAuthenticated, passport.authenticate('google', {
     successRedirect: '/login/messages',
@@ -130,6 +134,7 @@ router.get('/messages', checkNotAuthenticated, (req, res, next)=>{
 
 router.post('/messages', (req, res, next)=>{
     const payload = determineAccess(req);
+    console.log('===========CHECK AUTHENTICATE==============')
     // set some standard cookie options
     const cookieOptions = {
         path: req.baseUrl,
@@ -146,20 +151,56 @@ router.post('/messages', (req, res, next)=>{
 
     var listSession = req.session.jwt;
     var jwtCut = []
-    console.log(listSession)
+    
     listSession.forEach(element => {
-        jwtCut.push(element.slice(0, 20))
+        let shortJWT = element.slice(0, 20);
+        let newObj = {
+            fullJWT: element,
+            shortJWT: shortJWT
+        }
+        console.log(newObj)
+        jwtCut.push(newObj);
     });
     console.log("=========================")
     console.log(jwtCut)
+    //for(let i = 0; i < jwtCut.length; i++)
     //res.redirect('/secure/secretMessage/?access_token=' + encodeJWT(payload));
     res.render('messages',{
         title: 'Messages',
         sessionID: req.sessionID,
         activeSession: JSON.stringify(req.session, null, 4),
-        listSession: listSession,        
+        listSession: jwtCut,        
     })
 })
+
+//==================DISPLAY THE MESSAGE==========================
+router.get('/receiveMsg', (req, res, next)=>{
+    // get the current scope from the request path (remove the slashes from /dashboard/)
+      const scope = req.path.replace(/^\/+|\/+$/g, '');
+      // check the user has access to the current scope
+      const decoded = checkJWT(req.query['access_token'], scope);
+      console.log("===================")
+      console.log()
+      if (decoded.redirectURL) {
+        // show the error on the login page
+        res.redirect(decoded.redirectURL);
+      } else {
+        if(decoded.receiver === req.session.email || decoded.sender === 'sender'){
+            // display the webpage with title and token payload
+            res.render('receiveMsg', {
+                title: 'DISPLAY SECRET MESSAGE',
+                token: req.query['access_token'],
+                payload: decoded,
+                action: req.baseUrl + req.path,
+            });
+        }else{
+            res.render('receiveMsg', {
+                title: 'YOU ARE NOT AUTHENTICATED USER',                
+            });
+        }        
+      }
+    } );
+  
 
 //==================AUTHENTICATE METHODS==========================
 function checkAuthenticated(req, res, next) {

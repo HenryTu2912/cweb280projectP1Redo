@@ -27,8 +27,8 @@
     <code><pre>{{activeSession}}</pre></code>
 </div>
 <div class="card p-2 mb-2">
-    <h2>Click here to view the message {{cutJWT}}</h2>
+    <h2>Click here to view the message</h2>
     {{#each listSession}}
-        <li class="col-md-8 fs-4"><a href="/login/receiveMsg">{{cutJWT}} </a></li>
+        <li class="col-md-8 fs-4"><a href="/login/receiveMsg/?access_token={{this.fullJWT}}">{{this.shortJWT}} </a></li>
     {{/each}}
 </div>

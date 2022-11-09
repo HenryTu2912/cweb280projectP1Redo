@@ -11,26 +11,35 @@ var usersRouter = require('./routes/users');
 var devRouter = require('./routes/devLogin');
 //add a new const for the examples.js router
 const examplesRouter = require('./routes/examples')
-// const Handlebars = require("handlebars");
-// Handlebars.registerHelper('cutJWT', function(ses){
-//   var sb = ses.slice(0, 20);
-//   console.log(sb)
-//   return sb;
-// })
+const Handlebars = require("handlebars");
+Handlebars.registerHelper('cutJWT', function(ses){
+  var sb = ses.slice(0, 20);
+  console.log(sb)
+  return sb;
+})
 var app = express();
-const expbs = require('express-handlebars')
 
-var hbs = expbs.create({  
-  // defaultLayout: 'main',
-  // layoutsDir: path.join(__dirname, 'views'),
-  // partialsDir: path.join(__dirname, 'views'),
-  helpers: {
-    cutJWT: function () { return "Lorem ipsum" },
-  },
-});
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars')
+
+// const expbs = require('express-handlebars')
+
+// var hbs = expbs.create({  
+//   // defaultLayout: 'main',
+//   layoutsDir: path.join(__dirname, 'views'),
+//   partialsDir: path.join(__dirname, 'views'),
+//   helpers: {
+//     calculation: function(){
+//       return "Hello";
+//     }
+//   },
+// });
+
+// app.engine('handlebars', hbs.engine);
+// app.set('view engine', 'handlebars')
+
+
+
+
 // app.engine('handlebars', expbs({
 //   helpers: {
 //     cutJWT: function () { return "Lorem ipsum" },

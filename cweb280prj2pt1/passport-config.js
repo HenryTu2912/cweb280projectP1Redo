@@ -25,8 +25,6 @@ function initialize(passport, getUserByName) {
         clientSecret: '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',
         callbackURL: 'http://localhost:3000/login/messages'
     }, function (request, accessToken, refreshToken, profile, done){
-        
-        console.log(JSON.stringify(profile))
         return done(null, profile)
     }))
     passport.use(new LocalStrategy({usernameField: 'username'}, authenticateUser))

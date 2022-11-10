@@ -22,18 +22,18 @@ var app = express();
 app.use(cookieParser())
 const passport = require('passport')
 //------------Google Passport local-------------------
-var GoogleStrategy = require('passport-google-oidc').Strategy;
+// var GoogleStrategy = require('passport-google-oidc').Strategy;
 
-const GGUser = []
+// const GGUser = []
 
-passport.use(new GoogleStrategy({
-  clientID: '478420348143-m90s5qe3fn0sj3dijs7migom5g38v7b9.apps.googleusercontent.com',
-  clientSecret: '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',
-  callbackURL: 'http://localhost:3000/login/google/callback',
-  passReqToCallback: true
-}, function (request, accessToken, refreshToken, profile, done){
-  return done(null, profile)
-}))
+// passport.use(new GoogleStrategy({
+//   clientID: '478420348143-m90s5qe3fn0sj3dijs7migom5g38v7b9.apps.googleusercontent.com',
+//   clientSecret: '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',
+//   callbackURL: 'http://localhost:3000/login/google/callback',
+//   passReqToCallback: true
+// }, function (request, accessToken, refreshToken, profile, done){
+//   return done(null, profile)
+// }))
 
 
 //------------Passport local-------------------
@@ -52,17 +52,17 @@ app.use(session({
   saveUninitialized: false,
   store: new SqliteStore({ // a location to store session besides the memory
     client: new Sqlite('sessions.db', {verbose: console.log}),
-    expired: {clear: true, intervalMs: 1000*60*15},
+    expired: {clear: true, intervalMs: 24*60*60*1000},
   }),  
 }))
 
 
 app.use(passport.initialize())
 app.use(passport.session())
-passport.serializeUser((user, done) => done(null, user))
-passport.deserializeUser((user, done) => {
-    return done(null, user)
-})
+// passport.serializeUser((user, done) => done(null, user))
+// passport.deserializeUser((user, done) => {
+//     return done(null, user)
+// })
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

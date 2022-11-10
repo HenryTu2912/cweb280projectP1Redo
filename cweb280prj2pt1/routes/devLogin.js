@@ -7,18 +7,7 @@ const jwt = require('jsonwebtoken')
 let jwtArray = []
 
 
-const determineAccess = (req)=> {
-    const payload = {message: null, sender: null, receiver: null, expiredDate: null};
-    payload.message = req.body.message;
-    payload.sender = req.session.passport.user;
-    payload.receiver = req.body.email;
-    var date1 = new Date();
-    var date2 = new Date(req.body.exDate);
-    var dateDiff = Math.ceil((date2.getTime() - date1.getTime())/ (1000 * 3600 * 24));
-    console.log(dateDiff);
-    payload.expiredDate = dateDiff+'d';
-    return payload;
-  };
+
 
   const encodeJWT = (payload)=>{
     // get a private key stored in a file
@@ -48,6 +37,23 @@ const determineAccess = (req)=> {
     return decoded;
   };
 
+  const determineAccess = (req)=> {
+    
+    var decodeGG = checkJWT(req.session.passport.user);
+    
+
+
+    const payload = {message: null, sender: null, receiver: null, expiredDate: null};
+    payload.message = req.body.message;
+    payload.sender = req.session.passport.user;
+    payload.receiver = req.body.email;
+    var date1 = new Date();
+    var date2 = new Date(req.body.exDate);
+    var dateDiff = Math.ceil((date2.getTime() - date1.getTime())/ (1000 * 3600 * 24));
+    console.log(dateDiff);
+    payload.expiredDate = dateDiff+'d';
+    return payload;
+  };
 
 //-------------------------
 
@@ -73,7 +79,7 @@ router.post('/', checkNotAuthenticated, passport.authenticate('local',  {
         path: req.baseUrl,
         sameSite: 'lax',
         httpOnly: true,
-        maxAge: 30*24*60*60*1000,
+        maxAge: 30*24*60*60*1000, //Save cookies for 30 days
     }
     var user = {
         username: req.body.username,
@@ -129,6 +135,7 @@ router.get('/messages', isLoggedIn, (req, res, next)=>{
 router.post('/messages', isLoggedIn, (req, res, next)=>{
     const payload = determineAccess(req);
     console.log('===========CHECK AUTHENTICATE==============')
+    console.log('=======Session sender');
     // set some standard cookie options
     const cookieOptions = {
         path: req.baseUrl,
@@ -168,8 +175,7 @@ router.get('/receiveMsg', isLoggedIn, (req, res, next)=>{
     // get the current scope from the request path (remove the slashes from /dashboard/)
       const scope = req.path.replace(/^\/+|\/+$/g, '');
       // check the user has access to the current scope
-      const decoded = checkJWT(req.query['access_token'], scope);
-   
+      const decoded = checkJWT(req.query['access_token'], scope);      
       if (decoded.redirectURL) {
         // show the error on the login page
         res.redirect(decoded.redirectURL);
